@@ -1,0 +1,372 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Dec  5 11:17:23 2012
+@author: Piotr Laczkowski piotr.laczkowski@gmail.com
+
+Script version: v1.0
+
+SCRIPT DESCRIPTION:
+    This script is ment to ....
+"""
+#! SCRIPT NAME
+#!==========================================================================
+
+#! used to parse files more easily
+from __future__ import with_statement
+import numpy as np
+from numpy import *
+
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.ticker import OldScalarFormatter, MaxNLocator
+import matplotlib.ticker as ticker
+from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+import pylab
+from pylab import *
+import PyQt4
+from PyQt4 import *
+import sys, os, random
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
+# Qt4 bindings for core Qt functionalities (non-GUI)
+
+
+
+#! import the MainWindow widget from the converted .ui files
+from main_window import Ui_Dialog
+
+class DesignerMainWindow(QtGui.QMainWindow, Ui_Dialog):
+    """Customization for Qt Designer created window"""
+    
+     #!=======================================initialization=============================================
+    def __init__(self, parent = None):
+        #! initialization of the superclass
+        super(DesignerMainWindow, self).__init__(parent)     
+        self.setupUi(self) 
+   
+        #! defining file short name
+        shortpath = os.path.basename(filename)
+        try:
+            self.edit_title.setText('$Title$')
+            #self.edit_title.setText(shortpath[:-4])
+        except Exception:
+            self.edit_title.setText('TITLE')
+			
+
+        #! drawing
+        self.Draw()
+        
+        #! connect the signals with the slots
+        QtCore.QObject.connect(self.btn_pythonize, QtCore.SIGNAL("clicked()"), self.SavePython)
+        QtCore.QObject.connect(self.btn_module, QtCore.SIGNAL("clicked()"), self.ApplyModule)
+        QtCore.QObject.connect(self.btn_corrections, QtCore.SIGNAL("clicked()"), self.ApplyCorrection)
+        #! connecting changes of edits:
+        self.connect(self.edit_xlabel, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_ylabel, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_title, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_label, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_xmin, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_xmax, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_ymin, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_ymax, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_divx, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_multx, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_divy, SIGNAL('editingFinished ()'), self.on_change)
+        self.connect(self.edit_multy, SIGNAL('editingFinished ()'), self.on_change)
+        #! changes of checkboxes
+        self.connect(self.check_grid, SIGNAL('stateChanged(int)'), self.on_change)
+        self.connect(self.check_label, SIGNAL('stateChanged(int)'), self.on_change)
+        self.connect(self.check_tight, SIGNAL('stateChanged(int)'), self.on_change)
+        self.connect(self.check_xlim, SIGNAL('stateChanged(int)'), self.on_change)
+        self.connect(self.check_ylim, SIGNAL('stateChanged(int)'), self.on_change)   
+        #! changes of sliders
+        self.connect(self.slide_start, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_stop, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_xsize, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_xnr, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_xsizeticks, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_ysize, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_ynr, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_ysizeticks, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.slide_titlesize, SIGNAL('valueChanged(int)'), self.on_change)
+        #! changes for spins
+        self.connect(self.spin_x, SIGNAL('valueChanged(int)'), self.on_change)
+        self.connect(self.spin_y, SIGNAL('valueChanged(int)'), self.on_change)
+        
+       
+       
+    #!=======================================definitions=============================================
+    
+    def on_change(self):
+        self.mpl.canvas.ax.clear()
+        #redraw
+        self.Draw()
+
+    def ApplyCorrection(self):
+        print "running ApplyCorrection definition"        
+        pass    
+
+    def ApplyModule(self):
+        print "running ApplyModule definition"        
+        pass
+    
+    def read_data(self,filename):
+        infile = open(filename,"r")
+        X,Y=genfromtxt(infile,dtype=float,skip_header=self.slide_start.value(), skip_footer=self.slide_stop.value(),usecols=(self.spin_x.value()-1,self.spin_y.value()-1),unpack=True)
+
+        return X,Y
+
+    def Draw(self):
+        
+        #! setting up gobal variables for parsing to another funtions      
+        global X
+        global Y
+        
+        #! rerading data-file
+        X,Y=self.read_data(filename)
+          
+        #derivative correction
+#        R = float(self.textboxDt.text())
+#        E = float(self.textboxDH.text())
+#        EE = float(self.textboxDHH.text())
+        
+#        #field derivative correction
+#        '''to jest miejsce gdzie przemanazam wszystkie element listy b przez korekte derivative'''
+#        for i in iter(X0):
+#            index = X0.index(i)+1
+#            #X.append(X0[index-1] + ((float(index)/float(len(X0)))*float(R)))
+#            X.append(X0[index-1] + (float(H[index])*float(E))+ ((float(index)/float(len(X0)))*float(R)) + (float(H[index])*float(H[index])*float(EE)))
+
+        #! setting up ticks numbers from slider
+        majorLocatorX = MaxNLocator(self.slide_xnr.value())
+        majorLocatorY = MaxNLocator(self.slide_ynr.value())
+        #! definition of MPL
+        MPL=self.mpl.canvas.ax
+        MPL.set_title(str(self.edit_title.text()),fontsize=self.slide_titlesize.value())
+        MPL.set_xlabel(self.edit_xlabel.text(),fontsize=self.slide_xsize.value())
+        MPL.set_ylabel(self.edit_ylabel.text(),fontsize=self.slide_ysize.value())
+        #self.ticker.set_major_locator(MaxNLocator(4))
+        MPL.xaxis.set_major_locator(majorLocatorX)
+        MPL.yaxis.set_major_locator(majorLocatorY)
+
+        ticker.ScalarFormatter(useOffset=True, useMathText=True)  #- for offset - but need to be adapted
+       
+        for t in MPL.get_xticklabels():
+            t.set_fontsize(self.slide_xsizeticks.value())
+            
+        for t in MPL.get_yticklabels():
+            t.set_fontsize(self.slide_ysizeticks.value())
+        
+        # grid verification
+        if self.check_grid.isChecked():
+             MPL.get_xaxis().grid(True)
+             MPL.get_yaxis().grid(True)
+            
+        # legend verification
+        if self.check_label.isChecked():
+             MPL.legend(shadow=True, loc=0, borderaxespad=0.,fancybox=True)
+            #print "legend enabled"
+        
+#        #___________Smoothing____________
+#        degree = eval(str(self.textboxSmooth.text()))
+#        print "degree=", degree
+#        
+#        def on_smooth(data,degree,dropVals=False):
+#	       smoothed=[]
+#	       for i in range(degree,len(data)-degree):
+#	           point=data[i:i+degree]
+#	           smoothed.append((sum(point)/degree))
+#	       if dropVals: return smoothed
+#	
+#	       smoothed=[smoothed[0]]* int((degree+(degree/2)))+smoothed
+#	       while len(smoothed)<len(data):smoothed.append(smoothed[-1])
+#	       return smoothed
+        
+        # applying corrections for Y
+        try:
+            Y=[i*float(self.edit_multy.text())/float(self.edit_divy.text()) for i in Y]
+        except Exception:
+            pass
+        
+        # applying corrections for X
+        try:
+            X=[i*float(self.edit_multx.text())/float(self.edit_divx.text()) for i in X]
+        except Exception:
+            pass
+
+
+        #!============================================================================PLOTTING MULTIPLE FILES
+#        for i in range(len(self.curveList)):
+#            c = self.curveList[i]
+#            label = "Lsf=%.3f P=%.3f "%(c[2], c[3])
+#            self.plotCurve.axes.plot(c[0], c[1],linewidth=int(self.sliderLW.value()), color = cols[i%6], label = label)
+#        for i in range(len(self.fitList)):
+#            c = self.fitList[i]
+#            label = "fit: P=%.3f Lsf=%.3f \n P(err)=%.3f Lsf(err)=%.3f"%(c[2], c[3],c[4],c[5])
+#            self.plotCurve.axes.plot(c[0], c[1], color = cols[i+len(self.curveList)%6],linewidth=int(self.sliderLW.value()), label = label)
+#        if self.checkGrid.isChecked():
+#            self.plotCurve.axes.grid(True)
+#        # Legend
+#        if not (self.curveList == [] and self.fitList == []):
+#            if self.checkLegend.isChecked():
+#                leg = self.plotCurve.axes.legend(shadow=True, loc=0, borderaxespad=0.)
+#                for t in leg.get_texts():
+#                    t.set_fontsize(10)    # the legend text fontsize        
+        #!============================================================================
+
+        #! PLOTTING
+#        MPL.plot(X[:(len(X)/2)], Y[:(len(X)/2)], 'bo-',label=str(self.edit_label.text())+'_back',linewidth = 3,picker=1)
+#        MPL.plot(X[(len(X)/2):],Y[(len(X)/2):], 'ro-',label=str(self.edit_label.text())+'_forward',linewidth = 3,picker=1)
+        MPL.plot(X,Y, 'ro-',label=str(self.edit_label.text()),linewidth = 3,picker=1)
+
+        #limitation on axis        
+               
+        if self.check_xlim.isChecked():
+            print "limits X are set..."
+            MPL.set_xlim(eval(str(self.edit_xmin.text())),eval(str(self.edit_xmax.text())))
+        if self.check_ylim.isChecked():
+            print "limits Y are set..."
+            MPL.set_ylim(eval(str(self.edit_ymin.text())),eval(str(self.edit_ymax.text())))
+            
+#        #inset plotting
+#        #inset image
+#        print "Zoom=",float(eval(str(self.sliderZoom.value())))/100
+#        print "XInset=",float(eval(str(self.sliderXInset.value())))/100
+#        print "YInset=",float(eval(str(self.sliderYInset.value())))/100
+#        if eval(str(self.textboxInset.text()))!=0:
+#			inset = read_png("/home/piotr/Desktop/DIA_compact/insets/"+str(self.textboxInset.text())+".png")
+#			imagebox = OffsetImage(inset, zoom = float(eval(str(self.sliderZoom.value())))/100)
+#			ab = AnnotationBbox(imagebox, xy=(float(eval(str(self.sliderXInset.value())))/100,float(eval(str(self.sliderYInset.value())))/100), xycoords='axes fraction')
+#			self.axes.add_artist(ab)
+			
+       # tight layout verification
+        if self.check_tight.isChecked():
+            try:
+                
+                self.mpl.canvas.fig.tight_layout()
+                print "tighted"
+            except Exception:
+                print "exception in tight layout occured"
+                pass
+            #print "legend enabled"        
+        
+        
+        self.mpl.canvas.draw()
+
+
+#    def on_pick(self, event):
+#        pointpick = event.artist
+#        print "starting point..."
+#        y=pointpick.get_ydata()
+#        x=pointpick.get_xdata()
+#        ind = event.ind
+#        print "selected Y=",y[ind]
+#        #print "yList=",yList
+#        #print "selected X=",x[ind]
+#        #print "xList=",xList
+#        if len(yList)==0:
+#            yList.append(float(y[ind]))
+#            #print "yList appended=",yList
+#            xList.append(float(x[ind]))
+#            #print "xList appended=",xList
+#            self.on_draw()
+#            
+#        elif len(yList)==1:
+#            yList.append(float(y[ind]))
+#            xList.append(float(x[ind]))
+#            print "yList appended second time=",yList
+#            #print "xList appended second time=",xList
+#            diff=float(eval('%.2f-%.2f' %(yList[0],yList[1])))
+#            print "DIFFERANCE IS =", diff
+#            self.statusBar().showMessage('Difference is =  %f' % diff, 2000)
+#            
+#            #print "drawing line"
+#            yloc=(yList[0]+yList[1])/2
+#            #in between points
+#            x_mean=(xList[1]+xList[0])/2
+#            xList2=[]
+#            xList2.append(x_mean)
+#            xList2.append(x_mean)
+#            #end
+#            self.axes.plot(xList2,yList,'x-g',linewidth=3)
+#            if xList[0]>0:
+#                self.axes.text((xList[0]+(xList[0]/10)),yloc,'$\Delta y$ = ' + ("$"+str(diff)+"$"),color='green',weight='bold')
+#            else:
+#                self.axes.text((xList[0]-(xList[0]/10)),yloc,'$\Delta y$ = ' + ("$"+str(diff)+"$"),color='green',weight='bold')
+#            self.canvas.draw()                    
+#            yList[:]=[]
+#            xList[:]=[]
+#            #print "list were cleared"
+#        elif len(yList) >= 2:
+#            self.axes.clear()
+#            self.on_draw()
+#            yList[:]=[]
+#            #print "list was cleared"
+
+    def SavePython(self):
+        print "saving python script"
+        shortpath = os.path.basename(filename)
+        save_path2 = QFileDialog.getSaveFileName(self,"", shortpath +".py")
+        fpy=open(save_path2,"w")
+        fpy.write('#_________________________saved python script_______________ \n')
+        fpy.write('from __future__ import division \n')
+        fpy.write('import math \n')
+        fpy.write('import numpy \n')
+        fpy.write('import pylab \n')
+        fpy.write('from pylab import * \n')
+        fpy.flush()
+        #writing datapoints
+        fpy.write('X=')
+        #fpy.write(''.join(str(X)))
+        fpy.write(str(X))
+        fpy.write('\n')
+        fpy.write('Y=')
+        fpy.write(''.join(str(Y)))
+        fpy.write('\n')
+        fpy.flush()
+        #writing configuration
+        #fpy.write('majorLocatorX=MaxNLocator('+ str(self.sliderXn.value()) +') \n')
+        #fpy.write('majorLocatorY=MaxNLocator('+ str(self.sliderYn.value()) +') \n')
+        fpy.write("xlabel('$"+ self.edit_xlabel.text()+"$') \n")
+        fpy.write("ylabel('$"+ self.edit_ylabel.text()+"$') \n")
+        #fpy.write('xaxis.set_major_locator(majorLocatorX) \n')
+        #fpy.write('yaxis.set_major_locator(majorLocatorY) \n')
+        #plotting
+        fpy.write("plot(X[:int(len(Y)/2)], Y[:int(len(Y)/2)],")
+        fpy.write("'bo-', ")
+        fpy.write("label='"+str(self.edit_label.text())+"', ")
+        fpy.write('linewidth=3, ')
+        fpy.write('picker=2) \n')
+        
+        fpy.write("plot(X[int(len(Y)/2):], Y[int(len(Y)/2):], 'ro-',")
+        fpy.write("label='"+str(self.edit_label.text())+"', ")
+        fpy.write('linewidth=3, ')
+        fpy.write('picker=2) \n')
+        
+        #fpy.write("plot(X,Y,'o--') \n")
+        fpy.write("show() \n")
+
+        fpy.flush()
+        fpy.close()
+
+
+
+
+#!=======================================usuall command for starting GUI=============================================	
+
+def main():
+    app = QtGui.QApplication(sys.argv)  # create the GUI application
+    dmw = DesignerMainWindow()  # instantiate the main window
+    dmw.show()  # show it
+    sys.exit(app.exec_())
+
+#! defining used file
+#fifilename = sys.argv[1]
+if __name__ == "__main__":
+    filename = sys.argv[1]
+    #filename='test.dat'
+    main()
+
+
