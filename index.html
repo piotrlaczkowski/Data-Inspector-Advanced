@@ -31,37 +31,62 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+        <h1>
+<a name="welcome-to-data-inspector-advanced-dia-wiki-page-" class="anchor" href="#welcome-to-data-inspector-advanced-dia-wiki-page-"><span class="octicon octicon-link"></span></a>Welcome to <em>Data Inspector Advanced 'DIA'</em> wiki page !!!</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<h2>
+<a name="dai-description" class="anchor" href="#dai-description"><span class="octicon octicon-link"></span></a>DAI Description</h2>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+<p>This script aims for fast data-files reporting/viewing in a selected folder. It creates an html page containing thumbnails of files which extension is to be specified (column delimiter is detected automatically...). All Data-file columns will be displayed in the thumbnails... (Work in progress)</p>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p><img src="wiki/DIA.png" alt="Alt text" title="Optional title"></p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<h2>
+<a name="modules" class="anchor" href="#modules"><span class="octicon octicon-link"></span></a>Modules</h2>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>Moreover this script allows application of external python modules - that need to be included in "modules" directory and need an extension ending with "*<em>module.py" that can be executed on a selected file (when selecting a thumbnail). An example module named "PLOTER</em>module. py" can be found in the modules directory, and can be instantly apply to a selected file (by selecting a thumbnail -&gt; selecting module-&gt; and pushing "GO" button)...</p>
 
 <h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<a name="ploter-module" class="anchor" href="#ploter-module"><span class="octicon octicon-link"></span></a>Ploter Module</h3>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>This module provides GUI interface for most of matplotlibs standard plotting options. It also provides a possibility to manipulate data -&gt; corrections, derivatives etc...
+It can be use as an independent script if parsing the data-file path as a sys.arg (i.e. 'python PLOTER.py "datafile.data"' on linux platform)</p>
+
+<p><img src="https://github.com/piotrlaczkowski/Data-Inspector-Advanced/blob/master/wiki/DIA.png" alt="DIA IMAGE"><img src="wiki/PLOTER.png" alt="Alt text" title="Optional title"></p>
+
+<h2>
+<a name="example-data-file" class="anchor" href="#example-data-file"><span class="octicon octicon-link"></span></a>Example data-file</h2>
+
+<p>Example data-file can be found in example_data folder...</p>
+
+<h2>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+
+<p>I wanted to keep it as simple as possible in point of view of extra libraries, so finally what you need to make it work is:</p>
+
+<ul>
+<li>numpy</li>
+<li>scipy</li>
+<li>matplotlib + pylab</li>
+<li>PyQt4</li>
+<li>sys, os, random, subprocess, glob (python standard)</li>
+</ul><h2>
+<a name="what-is-left-to-enhance-in-dia" class="anchor" href="#what-is-left-to-enhance-in-dia"><span class="octicon octicon-link"></span></a>What is left to enhance in DIA</h2>
+
+<p>There are several things that I would like to change in this python script however lack of time for this project limits my interest in further development.
+I hoped to ask for your help in further development of this script to be much better and more universal. It can be very useful for scientists and not only but it needs to be a little more flexible.</p>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="modification-propositions" class="anchor" href="#modification-propositions"><span class="octicon octicon-link"></span></a>Modification propositions:</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<ul>
+<li><p>load data only once from a selected file and then operate on it (now each modification reloads the original data file with some restrictions put on the loaded data for example by skipping a selected number of header and footer lines (start and stop edit lines in GUI)) </p></li>
+<li><p>use numpy masked arrays for loading data manipulations (filtering, limits etc.....instead of reloading from file each time)</p></li>
+<li><p>decide from which columns to make thumbnails (default option is for all ...) - necessary ...?</p></li>
+</ul><h2>
+<a name="thanx--contribution" class="anchor" href="#thanx--contribution"><span class="octicon octicon-link"></span></a>Thanx &amp; Contribution</h2>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>This project was inspired by a great work of my colleague Danny Hykel who first showed me the wonderful world of python for science and developed first base version of the Data Inspector ...</p>
       </section>
     </div>
 
